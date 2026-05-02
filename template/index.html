@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head><title>Task Tracker</title></head>
+<body>
+    <h1>Task Management System</h1>
+
+    <div style="display: flex; gap: 40px; margin-bottom: 20px;">
+
+        <div>
+            <form action="/add_project" method="POST" style="margin-bottom: 10px;">
+                <strong>Add Project:</strong>
+                <input type="text" name="project_name" placeholder="Project Name" required>
+                <button type="submit">Add</button>
+            </form>
+            <ul style="list-style-type: none; padding-left: 0;">
+                {% for project in projects %}
+                    <li style="margin-bottom: 5px;">
+                        {{ project.name }}
+                        <form action="/delete_project/{{ project.project_id }}" method="POST" style="display:inline;">
+                            <button type="submit" style="font-size: 0.8em; margin-left: 10px;">Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div>
+            <form action="/add_developer" method="POST" style="margin-bottom: 10px;">
+                <strong>Add Developer:</strong>
+                <input type="text" name="developer_name" placeholder="Developer Name" required>
+                <button type="submit">Add</button>
+            </form>
+            <ul style="list-style-type: none; padding-left: 0;">
+                {% for dev in developers %}
+                    <li style="margin-bottom: 5px;">
+                        {{ dev.name }}
+                        <form action="/delete_developer/{{ dev.developer_id }}" method="POST" style="display:inline;">
+                            <button type="submit" style="font-size: 0.8em; margin-left: 10px;">Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+    <hr>
+
+    <h2>Add New Task</h2>
+    <form action="/add" method="POST">
+        <input type="text" name="title" placeholder="Task Title" required>
+        <input type="number" name="hours" placeholder="Est. Hours" required>
+        <select name="status">
+            <option value="To Do">To Do</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Done">Done</option>
+        </select>
+
+        <select name="project_id" required>
+            <option value="" disabled selected>Select Project</option>
+            {% for project in projects %}
+                <option value="{{ project.project_id }}">{{ project.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="developer_id" required>
+            <option value="" disabled selected>Select Developer</option>
+            {% for dev in developers %}
+                <option value="{{ dev.developer_id }}">{{ dev.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <hr>
+
+    <h2>Task Report</h2>
+    <form action="/" method="GET">
+        <label>Project:</label>
+        <select name="filter_project">
+            <option value="">All Projects</option>
+            {% for project in projects %}
+                <option value="{{ project.project_id }}">{{ project.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Developer:</label>
+        <select name="filter_developer">
+            <option value="">All Developers</option>
+            {% for dev in developers %}
+                <option value="{{ dev.developer_id }}">{{ dev.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Hours Range:</label>
+        <input type="number" name="min_hours" placeholder="Min" style="width: 70px;">
+        <input type="number" name="max_hours" placeholder="Max" style="width: 70px;">
+
+        <button type="submit">Generate Report</button>
+    </form>
+
+    <h3>Total Estimated Hours in View: {{ total_hours }}</h3>
+
+    <ul>
+        {% for task in tasks %}
+            <li style="margin-bottom: 10px;">
+                <form action="/update/{{ task.task_id }}" method="POST" style="display:inline;">
+                    <input type="text" name="title" value="{{ task.title }}" required>
+
+                    <input type="number" name="hours" value="{{ task.estimated_hours }}" style="width: 60px;" required>
+
+                    <select name="status">
+                        <option value="To Do" {% if task.status == 'To Do' %}selected{% endif %}>To Do</option>
+                        <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Done" {% if task.status == 'Done' %}selected{% endif %}>Done</option>
+                    </select>
+
+                    <select name="project_id" required>
+                        {% for project in projects %}
+                            <option value="{{ project.project_id }}" {% if task.project_id == project.project_id %}selected{% endif %}>{{ project.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select name="developer_id" required>
+                        {% for dev in developers %}
+                            <option value="{{ dev.developer_id }}" {% if task.developer_id == dev.developer_id %}selected{% endif %}>{{ dev.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit">Update</button>
+                </form>
+
+                <form action="/delete/{{ task.task_id }}" method="GET" style="display:inline;">
+                    <button type="submit">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
